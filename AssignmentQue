@@ -1,0 +1,215 @@
+
+Coding Answer:1
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define ERROR_IN_DEVIDATION    -1
+
+typedef struct {
+    unsigned quotient;
+    unsigned remainder;
+} divider_s;
+
+/****************************************************
+* API to number number using input parameters
+* @param[in] divider_s structure
+* @param[in] unsigned devidation number
+* @param[in] unsigned devide by number
+* @param[out] int8_t err 
+****************************************************/
+int8_t divide(divider_s* answer, unsigned number, unsigned divide_by) 
+{
+    int8_t err = 0;
+    // Check for divide-by-zero error
+    if (divide_by == 0) 
+    {
+        printf("Error: Division by zero is not allowed.\n");
+        err = ERROR_IN_DEVIDATION; 
+    }
+    else
+    {  
+          // Calculate quotient and remainder
+          answer->quotient = number / divide_by;
+          answer->remainder = number % divide_by;
+    }
+    return err;  
+}
+
+int main() 
+{
+    divider_s result;
+    unsigned number, divide_by;
+    int8_t err = 0;
+
+    printf("Enter number for devidation: ");
+    scanf("%d", &number);
+   
+    printf("\nEnter divide by number: ");
+    scanf("%d", &divide_by);
+
+    err = divide(&result, number, divide_by);
+    if(err == ERROR_IN_DEVIDATION)
+    {
+         printf("\n Failed to divide number");
+    }
+    else
+    {
+      printf("\nQuotient: %u", result.quotient);
+      printf("\nRemainder: %u", result.remainder);
+    }
+    return 0;
+}
+
+
+Coding Answer: 2
+
+#include <stdio.h>
+#include <stddef.h>
+#include <stdbool.h>
+
+// Define the timer_s struct type
+typedef struct {
+    unsigned int time_remaining;
+    unsigned int timer_reload_value;
+    void (*callback)(void);
+} timer_s;
+
+/****************************************************
+* API to Callback of Timer0
+* @param[in] void
+* @param[out] void 
+****************************************************/
+void timer_0_callback(void) 
+{
+    printf("\nTimer 0 Callback");
+}
+
+/****************************************************
+* API to Callback of Timer1
+* @param[in] void
+* @param[out] void 
+****************************************************/
+void timer_1_callback(void) 
+{
+    printf("\nTimer 1 Callback");
+}
+
+/****************************************************
+* API to periodic tick timer
+* @param[in] timer_s structure
+* @param[in] size_t size
+* @param[out] void 
+****************************************************/
+void timer_periodic_task(timer_s* timers, size_t timers_array_size) 
+{
+    for (size_t i = 0; i < timers_array_size; i++)
+    {
+        timer_s* timer = &timers[i];
+
+        if (timer->time_remaining == 0) 
+        {
+            // Call the timer callback function
+            timer->callback();
+
+            // Reset the timer with the reload value
+            timer->time_remaining = timer->timer_reload_value;
+        } 
+        else 
+        {
+            // Decrement the time_remaining for active timers
+            if (timer->time_remaining > 0) 
+            {
+                timer->time_remaining--;
+            }
+        }
+    }
+}
+
+int main() 
+{
+    // Timer configurations
+    timer_s timers_example[] = 
+    {
+        {
+            .time_remaining = 0U,
+            .timer_reload_value = 5U,
+            .callback = timer_0_callback,
+        },
+        
+        {
+            .time_remaining = 3U,
+            .timer_reload_value = 7U,
+            .callback = timer_1_callback,
+        },
+    };
+
+    // Number of timers in the configuration
+    size_t num_timers = sizeof(timers_example) / sizeof(timer_s);
+
+    // Test code by manually invoking timer_periodic_task
+    for (int tick = 0; tick < 10; tick++) 
+    {
+        printf("Tick %d:\n", tick);
+        timer_periodic_task(timers_example, num_timers);
+    }
+
+    return 0;
+}
+
+
+Answer: 4
+
+For unit testing I used to cmocka and unity tool using ceedling framework.
+
+Unit test for Que: 1
+
+#define UNIT_TESTING 1
+
+#include <stdarg.h>
+#include <stddef.h>
+#include <setjmp.h>
+#include <cmocka.h>
+
+void setUp(void) 
+{
+    // set up any resources if needed
+}
+
+void tearDown(void) 
+{
+    // Clean up any resources if needed
+}
+
+/****************************************************
+* API to check test case for devide by zero
+* @param[in] void
+* @param[out] void 
+****************************************************/
+void test_divide_by_zero_error(void) 
+{
+    divider_s result;
+    int8_t err = divide(&result, 10, 0);
+    TEST_ASSERT_EQUAL(ERROR_IN_DEVIDATION, err);
+}
+
+/****************************************************
+* API to check test case for devide valid
+* @param[in] void
+* @param[out] void 
+****************************************************/
+void test_divide_valid_case(void) {
+    divider_s result;
+    int8_t err = divide(&result, 10, 2);
+    TEST_ASSERT_EQUAL(0, err);
+    TEST_ASSERT_EQUAL(5, result.quotient);
+    TEST_ASSERT_EQUAL(0, result.remainder);
+}
+
+
+int main(void) 
+{
+    test_divide_by_zero_error();
+    test_divide_valid_case();
+}
+
